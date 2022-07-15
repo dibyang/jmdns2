@@ -19,6 +19,7 @@ buildscript {
 
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'signing'
 apply plugin: 'net.researchgate.release'
 
 
@@ -95,11 +96,10 @@ javadoc {
 }
 
 
-
 uploadArchives {
   repositories {
     mavenDeployer {
-      //beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
       repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
         authentication(userName: project.ossrhUsername, password: project.ossrhPassword)

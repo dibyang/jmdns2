@@ -61,6 +61,13 @@ configurations.all {
   }
 }
 
+group="net.xdob.jmdns"
+version="1.0.0-SNAPSHOT"
+
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
+
 repositories {
   mavenLocal()
   maven { url 'https://maven.aliyun.com/repository/public/' }
@@ -76,8 +83,6 @@ dependencies {
 }
 
 
-sourceCompatibility = project.jdkVersion
-targetCompatibility = project.jdkVersion
 
 java {
   withSourcesJar()

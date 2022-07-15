@@ -752,7 +752,8 @@ public class JmmDNSImpl implements JmmDNS, NetworkTopologyListener, ServiceInfoI
 
         public void start(Timer timer) {
             // Run once up-front otherwise the list of servers will only appear after a delay.
-            timer.schedule(this, 0, DNSConstants.NETWORK_CHECK_INTERVAL);
+            run();
+            timer.schedule(this, DNSConstants.NETWORK_CHECK_INTERVAL, DNSConstants.NETWORK_CHECK_INTERVAL);
         }
 
         /**

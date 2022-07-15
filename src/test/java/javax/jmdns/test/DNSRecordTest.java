@@ -94,7 +94,7 @@ public class DNSRecordTest {
         Whitebox.setInternalState(dnsIncoming, "_messageInputStream", stream);
         PowerMock.replayAll();
 
-        DNSRecord record = Whitebox.invokeMethod(dnsIncoming, "readAnswer", null);
+        DNSRecord record = Whitebox.invokeMethod(dnsIncoming, "readAnswer", (Object)null);
         Assert.assertNull(record);
         PowerMock.verifyAll();
 

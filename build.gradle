@@ -83,17 +83,47 @@ dependencies {
 }
 
 
-
-java {
-  withSourcesJar()
-  withJavadocJar()
-}
-
-javadoc {
+tasks.withType(JavaCompile) {
   options.encoding = 'UTF-8'
-  exclude 'javax/jmdns/**'
 }
 
+//对于典型的 Java 项目，您可以添加一个javadocJar以及一个 sourcesJar任务
+task javadocJar(type: Jar) {
+  classifier = 'javadoc'
+  from javadoc
+}
+
+task sourcesJar(type: Jar) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+// javadoc 配置，这里是自定义了 java doc 的一些配置
+javadoc {
+  description = "Generates project-level javadoc for use in -javadoc jar"
+
+  options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
+  options.author = true
+  options.version = true
+  options.header = project.name
+  options.addStringOption('Xdoclint:none', '-quiet')
+
+  // suppress warnings due to cross-module @see and @link references;
+  // note that global 'api' task does display all warnings.
+  logging.captureStandardError LogLevel.INFO
+  logging.captureStandardOutput LogLevel.INFO // suppress "## warnings" message
+  options.encoding = "UTF-8"  //编码一定要配置否则直接出错
+  options.charSet = 'UTF-8'
+}
+
+// 并将它们与项目 jar 本身一起连接到 artifacts 集合中：
+artifacts {
+  archives javadocJar, sourcesJar
+}
+
+// 将构建的包签名
+signing {
+  sign configurations.archives
+}
 
 uploadArchives {
   repositories {
@@ -107,11 +137,36 @@ uploadArchives {
       snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
         authentication(userName: project.ossrhUsername, password: project.ossrhPassword)
       }
+
+      pom.project {
+        name 'jmds2'
+        packaging 'jar'
+        // optionally artifactId can be defined here
+        description "the jmDNS library"
+        url 'https://github.com/dibyang/jmdns2'
+
+        scm {
+          connection 'scm:git:https://github.com/dibyang/jmdns2.git'
+          developerConnection 'scm:git:https://github.com/dibyang/jmdns2.git'
+          url 'https://github.com/dibyang/jmdns2.git'
+        }
+
+        licenses {
+          license {
+            name 'The Apache License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+          }
+        }
+
+        developers {
+          developer {
+            id 'yangzj'
+            name 'Yang zhijian'
+            email '3227817@qq.com'
+          }
+        }
+      }
     }
   }
 }
 
-
-tasks.withType(JavaCompile) {
-  options.encoding = 'UTF-8'
-}

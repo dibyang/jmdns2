@@ -5,4 +5,4 @@ build/*
 /build/
 /.gradle/
 /.settings/
-gradle.properties
+signing.properties

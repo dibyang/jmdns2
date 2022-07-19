@@ -78,8 +78,8 @@ configurations.all {
 group="net.xdob.jmdns"
 
 
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"
+sourceCompatibility = project.jdkVersion
+targetCompatibility = project.jdkVersion
 
 repositories {
   mavenLocal()
@@ -95,6 +95,9 @@ dependencies {
   testImplementation 'org.powermock:powermock-api-easymock:2.0.7'
 }
 
+processResources {
+  filter org.apache.tools.ant.filters.ReplaceTokens, beginToken : '${', endToken : '}',tokens:['project.version': project.version]
+}
 
 tasks.withType(JavaCompile) {
   options.encoding = 'UTF-8'

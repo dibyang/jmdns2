@@ -60,14 +60,7 @@ public class DiscoverServices {
         try {
 
             // Activate these lines to see log messages of JmDNS
-            boolean log = false;
-            if (log) {
-                Logger logger = LoggerFactory.getLogger(JmDNS.class.getName());
-                ConsoleHandler handler = new ConsoleHandler();
-                logger.addHandler(handler);
-                logger.setLevel(Level.FINER);
-                handler.setLevel(Level.FINER);
-            }
+
 
             final JmDNS jmdns = JmDNS.create();
             jmdns.addServiceListener("_http._tcp.local.", new SampleListener());

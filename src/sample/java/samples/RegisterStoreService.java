@@ -18,16 +18,11 @@
 
 package samples;
 
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.LogManager;
-import org.slf4j.Logger;
-
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Random;
 
 /**
  * Sample Code for Service Registration using JmDNS.
@@ -54,9 +49,9 @@ import javax.jmdns.ServiceInfo;
  *
  * @author Werner Randelshofer
  */
-public class RegisterService {
+public class RegisterStoreService {
 
-    public final static String REMOTE_TYPE = "_touch-remote._tcp.local.";
+    public final static String REMOTE_TYPE = "_store-node._tcp.local.";
 
     /**
      * @param args
@@ -64,44 +59,37 @@ public class RegisterService {
      */
     public static void main(String[] args) {
         // Activate these lines to see log messages of JmDNS
-
-
         try {
             System.out.println("Opening JmDNS...");
             JmDNS jmdns = JmDNS.create();
             System.out.println("Opened JmDNS!");
             Random random = new Random();
             int id = random.nextInt(100000);
-            System.out.println("\nPress r and Enter, to register Itunes Remote service 'Android-'" + id);
+            System.out.println("\nPress q and Enter, to quit\nPress r and Enter, to register Store Node service 'Store-Node-" + id + "'");
             int b;
-            while ((b = System.in.read()) != -1 && (char) b != 'r') {
-                /* Stub */
+            while ((b = System.in.read()) != -1) {
+                if(b=='r'){
+                    final HashMap<String, String> values = new HashMap<String, String>();
+                    values.put("DvNm", "Store-Node-" + id);
+                    values.put("DvTy", "mds");
+                    values.put("ver", "1");
+
+                    byte[] name = new byte[20];
+                    random.nextBytes(name);
+                    System.out.println("Requesting pairing for " + toHex(name));
+                    ServiceInfo pairservice = ServiceInfo.create(REMOTE_TYPE, toHex(name), 1025, 0, 0, values);
+                    jmdns.registerService(pairservice);
+
+                    System.out.println("\nRegistered Service as " + pairservice);
+                    id = random.nextInt(100000);
+                    System.out.println("\nPress q and Enter, to quit\nPress r and Enter, to register Store Node service 'Store-Node-" + id + "'");
+                }else if(b=='q'){
+                    break;
+                }
+
             }
 
-            final HashMap<String, String> values = new HashMap<String, String>();
-            values.put("DvNm", "Android-" + id);
-            values.put("RemV", "10000");
-            values.put("DvTy", "iPod");
-            values.put("RemN", "Remote");
-            values.put("txtvers", "1");
-            byte[] pair = new byte[8];
-            random.nextBytes(pair);
-            values.put("Pair", toHex(pair));
-
-            byte[] name = new byte[20];
-            random.nextBytes(name);
-            System.out.println("Requesting pairing for " + toHex(name));
-            ServiceInfo pairservice = ServiceInfo.create(REMOTE_TYPE, toHex(name), 1025, 0, 0, values);
-            jmdns.registerService(pairservice);
-
-            System.out.println("\nRegistered Service as " + pairservice);
-            System.out.println("Press q and Enter, to quit");
-            // int b;
-            while ((b = System.in.read()) != -1 && (char) b != 'q') {
-                /* Stub */
-            }
             System.out.println("Closing JmDNS...");
-            jmdns.unregisterService(pairservice);
             jmdns.unregisterAllServices();
             jmdns.close();
             System.out.println("Done!");

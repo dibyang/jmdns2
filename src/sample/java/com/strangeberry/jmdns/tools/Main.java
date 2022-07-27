@@ -92,21 +92,6 @@ public class Main {
         boolean debug = false;
         InetAddress intf = null;
 
-        if ((argc > 0) && "-d".equals(argv[0])) {
-            System.arraycopy(argv, 1, argv, 0, --argc);
-
-            {
-                ConsoleHandler handler = new ConsoleHandler();
-                handler.setLevel(Level.FINEST);
-                for (Enumeration<String> enumerator = LogManager.getLogManager().getLoggerNames(); enumerator.hasMoreElements();) {
-                    String loggerName = enumerator.nextElement();
-                    Logger logger = LoggerFactory.getLogger(loggerName);
-                    logger.addHandler(handler);
-                    logger.setLevel(Level.FINEST);
-                }
-            }
-            debug = true;
-        }
 
         if ((argc > 1) && "-i".equals(argv[0])) {
             intf = InetAddress.getByName(argv[1]);

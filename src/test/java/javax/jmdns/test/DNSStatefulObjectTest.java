@@ -3,79 +3,80 @@
  */
 package javax.jmdns.test;
 
-import static org.junit.Assert.*;
-
-import javax.jmdns.impl.DNSStatefulObject.DNSStatefulObjectSemaphore;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import javax.jmdns.impl.DNSStatefulObject.DNSStatefulObjectSemaphore;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
  */
 public class DNSStatefulObjectTest {
 
-    public static final class WaitingThread extends Thread {
+  public static final class WaitingThread extends Thread {
 
-        private final DNSStatefulObjectSemaphore _semaphore;
-        private final long                       _timeout;
+    private final DNSStatefulObjectSemaphore _semaphore;
+    private final long _timeout;
 
-        private boolean _hasFinished;
+    private boolean _hasFinished;
 
-        public WaitingThread(DNSStatefulObjectSemaphore semaphore, long timeout) {
-            super("Waiting thread");
-            _semaphore = semaphore;
-            _timeout = timeout;
-            _hasFinished = false;
-        }
-
-        @Override
-        public void run() {
-            _semaphore.waitForEvent(_timeout);
-            _hasFinished = true;
-        }
-
-        /**
-         * @return the hasFinished
-         */
-        public boolean hasFinished() {
-            return _hasFinished;
-        }
-
+    public WaitingThread(DNSStatefulObjectSemaphore semaphore, long timeout) {
+      super("Waiting thread");
+      _semaphore = semaphore;
+      _timeout = timeout;
+      _hasFinished = false;
     }
 
-    DNSStatefulObjectSemaphore _semaphore;
-
-    @Before
-    public void setup() {
-        _semaphore = new DNSStatefulObjectSemaphore("test");
+    @Override
+    public void run() {
+      _semaphore.waitForEvent(_timeout);
+      _hasFinished = true;
     }
 
-    @After
-    public void teardown() {
-        _semaphore = null;
+    /**
+     * @return the hasFinished
+     */
+    public boolean hasFinished() {
+      return _hasFinished;
     }
 
-    @Test
-    public void testWaitAndSignal() throws InterruptedException {
-        WaitingThread thread = new WaitingThread(_semaphore, Long.MAX_VALUE);
-        thread.start();
-        Thread.sleep(1);
-        assertFalse("The thread should be waiting.", thread.hasFinished());
-        _semaphore.signalEvent();
-        Thread.sleep(1);
-        assertTrue("The thread should have finished.", thread.hasFinished());
-    }
+  }
 
-    @Test
-    public void testWaitAndTimeout() throws InterruptedException {
-        WaitingThread thread = new WaitingThread(_semaphore, 100);
-        thread.start();
-        Thread.sleep(1);
-        assertFalse("The thread should be waiting.", thread.hasFinished());
-        Thread.sleep(150);
-        assertTrue("The thread should have finished.", thread.hasFinished());
-    }
+  DNSStatefulObjectSemaphore _semaphore;
+
+  @Before
+  public void setup() {
+    _semaphore = new DNSStatefulObjectSemaphore("test");
+  }
+
+  @After
+  public void teardown() {
+    _semaphore = null;
+  }
+
+  @Test
+  public void testWaitAndSignal() throws InterruptedException {
+    WaitingThread thread = new WaitingThread(_semaphore, Long.MAX_VALUE);
+    thread.start();
+    Thread.sleep(1);
+    assertFalse("The thread should be waiting.", thread.hasFinished());
+    _semaphore.signalEvent();
+    Thread.sleep(1);
+    assertTrue("The thread should have finished.", thread.hasFinished());
+  }
+
+  @Test
+  public void testWaitAndTimeout() throws InterruptedException {
+    WaitingThread thread = new WaitingThread(_semaphore, 100);
+    thread.start();
+    Thread.sleep(1);
+    assertFalse("The thread should be waiting.", thread.hasFinished());
+    Thread.sleep(150);
+    assertTrue("The thread should have finished.", thread.hasFinished());
+  }
 
 }

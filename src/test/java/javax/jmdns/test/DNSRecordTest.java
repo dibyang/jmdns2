@@ -34,69 +34,69 @@ import static org.easymock.EasyMock.expect;
 @PrepareForTest({DNSIncoming.class, DNSIncoming.MessageInputStream.class})
 public class DNSRecordTest {
 
-    private static final int TTL_IN_SECONDS = 60 * 60; // ONE HOUR
-    private static final long ONE_HOUR_IN_MILLIS = 60 * 60 * 1000;
-    private static final long PERCENT_STALE_79 = ONE_HOUR_IN_MILLIS * 79 / 100;
-    private static final long PERCENT_STALE_84 = ONE_HOUR_IN_MILLIS * 84 / 100;
-    private static final long PERCENT_STALE_89 = ONE_HOUR_IN_MILLIS * 89 / 100;
-    private static final long PERCENT_STALE_94 = ONE_HOUR_IN_MILLIS * 94 / 100;
-    private static final long PERCENT_STALE_99 = ONE_HOUR_IN_MILLIS * 99 / 100;
+  private static final int TTL_IN_SECONDS = 60 * 60; // ONE HOUR
+  private static final long ONE_HOUR_IN_MILLIS = 60 * 60 * 1000;
+  private static final long PERCENT_STALE_79 = ONE_HOUR_IN_MILLIS * 79 / 100;
+  private static final long PERCENT_STALE_84 = ONE_HOUR_IN_MILLIS * 84 / 100;
+  private static final long PERCENT_STALE_89 = ONE_HOUR_IN_MILLIS * 89 / 100;
+  private static final long PERCENT_STALE_94 = ONE_HOUR_IN_MILLIS * 94 / 100;
+  private static final long PERCENT_STALE_99 = ONE_HOUR_IN_MILLIS * 99 / 100;
 
-    @Test
-    public void testStaleDNSRecord() {
+  @Test
+  public void testStaleDNSRecord() {
 
-        DNSRecord record = new DNSRecord.Service("test", DNSRecordClass.CLASS_IN, true, TTL_IN_SECONDS, 0, 0, 0, "test");
-        long now = System.currentTimeMillis();
+    DNSRecord record = new DNSRecord.Service("test", DNSRecordClass.CLASS_IN, true, TTL_IN_SECONDS, 0, 0, 0, "test");
+    long now = System.currentTimeMillis();
 
-        // stale threshold is 80% + random offset
-        Assert.assertFalse("Record should not be stale after creation", record.isStaleAndShouldBeRefreshed(now));
-        Assert.assertFalse("79% should not be stale", record.isStaleAndShouldBeRefreshed(now + PERCENT_STALE_79));
-        Assert.assertTrue("84% should be stale", record.isStaleAndShouldBeRefreshed(now + PERCENT_STALE_84));
+    // stale threshold is 80% + random offset
+    Assert.assertFalse("Record should not be stale after creation", record.isStaleAndShouldBeRefreshed(now));
+    Assert.assertFalse("79% should not be stale", record.isStaleAndShouldBeRefreshed(now + PERCENT_STALE_79));
+    Assert.assertTrue("84% should be stale", record.isStaleAndShouldBeRefreshed(now + PERCENT_STALE_84));
 
-        // stale threshold is 85% + random offset
-        record.incrementRefreshPercentage();
-        Assert.assertFalse("84% should not be stale", record.isStaleAndShouldBeRefreshed(now + PERCENT_STALE_84));
-        Assert.assertTrue("89% should be stale", record.isStaleAndShouldBeRefreshed(now + PERCENT_STALE_89));
+    // stale threshold is 85% + random offset
+    record.incrementRefreshPercentage();
+    Assert.assertFalse("84% should not be stale", record.isStaleAndShouldBeRefreshed(now + PERCENT_STALE_84));
+    Assert.assertTrue("89% should be stale", record.isStaleAndShouldBeRefreshed(now + PERCENT_STALE_89));
 
-        // stale threshold is 90% + random offset
-        record.incrementRefreshPercentage();
-        Assert.assertFalse("89% should not be stale", record.isStaleAndShouldBeRefreshed(now + PERCENT_STALE_89));
-        Assert.assertTrue("94% should be stale", record.isStaleAndShouldBeRefreshed(now + PERCENT_STALE_94));
+    // stale threshold is 90% + random offset
+    record.incrementRefreshPercentage();
+    Assert.assertFalse("89% should not be stale", record.isStaleAndShouldBeRefreshed(now + PERCENT_STALE_89));
+    Assert.assertTrue("94% should be stale", record.isStaleAndShouldBeRefreshed(now + PERCENT_STALE_94));
 
-        // stale threshold is 95% + random offset
-        record.incrementRefreshPercentage();
-        Assert.assertFalse("94% should not be stale", record.isStaleAndShouldBeRefreshed(now + PERCENT_STALE_94));
-        Assert.assertTrue("99% should be stale", record.isStaleAndShouldBeRefreshed(now + PERCENT_STALE_99));
+    // stale threshold is 95% + random offset
+    record.incrementRefreshPercentage();
+    Assert.assertFalse("94% should not be stale", record.isStaleAndShouldBeRefreshed(now + PERCENT_STALE_94));
+    Assert.assertTrue("99% should be stale", record.isStaleAndShouldBeRefreshed(now + PERCENT_STALE_99));
 
-        // stale threshold is 100%
-        record.incrementRefreshPercentage();
-        Assert.assertFalse("99% should not be stale", record.isStaleAndShouldBeRefreshed(now + PERCENT_STALE_99));
-        Assert.assertTrue("100% should be stale", record.isStaleAndShouldBeRefreshed(now + ONE_HOUR_IN_MILLIS));
+    // stale threshold is 100%
+    record.incrementRefreshPercentage();
+    Assert.assertFalse("99% should not be stale", record.isStaleAndShouldBeRefreshed(now + PERCENT_STALE_99));
+    Assert.assertTrue("100% should be stale", record.isStaleAndShouldBeRefreshed(now + ONE_HOUR_IN_MILLIS));
 
-    }
+  }
 
-    @Test
-    public void testIPv4MappedIPv6Addresses() throws Exception {
+  @Test
+  public void testIPv4MappedIPv6Addresses() throws Exception {
 
-        DNSIncoming.MessageInputStream stream = PowerMock.createNiceMock(DNSIncoming.MessageInputStream.class);
-        expect(stream.readName()).andReturn("test");
-        expect(stream.readUnsignedShort()).andReturn(DNSRecordType.TYPE_AAAA.indexValue());
-        expect(stream.readUnsignedShort()).andReturn(DNSRecordClass.CLASS_IN.indexValue());
-        expect(stream.readInt()).andReturn(3600);
-        expect(stream.readUnsignedShort()).andReturn(16);
-        expect(stream.readBytes(16)).andReturn(new byte[]
-                        { 0, 0, 0, 0,
-                          0, 0, 0, 0,
-                          0, 0, (byte) 0xff, (byte) 0xff,
-                        127, 0, 0, 1});
+    DNSIncoming.MessageInputStream stream = PowerMock.createNiceMock(DNSIncoming.MessageInputStream.class);
+    expect(stream.readName()).andReturn("test");
+    expect(stream.readUnsignedShort()).andReturn(DNSRecordType.TYPE_AAAA.indexValue());
+    expect(stream.readUnsignedShort()).andReturn(DNSRecordClass.CLASS_IN.indexValue());
+    expect(stream.readInt()).andReturn(3600);
+    expect(stream.readUnsignedShort()).andReturn(16);
+    expect(stream.readBytes(16)).andReturn(new byte[]
+        {0, 0, 0, 0,
+            0, 0, 0, 0,
+            0, 0, (byte) 0xff, (byte) 0xff,
+            127, 0, 0, 1});
 
-        DNSIncoming dnsIncoming = Whitebox.newInstance(DNSIncoming.class);
-        Whitebox.setInternalState(dnsIncoming, "_messageInputStream", stream);
-        PowerMock.replayAll();
+    DNSIncoming dnsIncoming = Whitebox.newInstance(DNSIncoming.class);
+    Whitebox.setInternalState(dnsIncoming, "_messageInputStream", stream);
+    PowerMock.replayAll();
 
-        DNSRecord record = Whitebox.invokeMethod(dnsIncoming, "readAnswer", (Object)null);
-        Assert.assertNull(record);
-        PowerMock.verifyAll();
+    DNSRecord record = Whitebox.invokeMethod(dnsIncoming, "readAnswer", (Object) null);
+    Assert.assertNull(record);
+    PowerMock.verifyAll();
 
-    }
+  }
 }

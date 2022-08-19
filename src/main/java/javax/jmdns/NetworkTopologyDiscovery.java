@@ -1,10 +1,9 @@
 package javax.jmdns;
 
+import javax.jmdns.impl.NetworkTopologyDiscoveryImpl;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.concurrent.atomic.AtomicReference;
-
-import javax.jmdns.impl.NetworkTopologyDiscoveryImpl;
 
 /**
  * This class is used to resolve the list of Internet address to use when attaching JmDNS to the network.
@@ -50,115 +49,114 @@ import javax.jmdns.impl.NetworkTopologyDiscoveryImpl;
  */
 public interface NetworkTopologyDiscovery {
 
+  /**
+   * NetworkTopologyDiscovery.Factory enable the creation of new instance of NetworkTopologyDiscovery.
+   */
+  public static final class Factory {
+    private static volatile NetworkTopologyDiscovery _instance;
+
     /**
-     * NetworkTopologyDiscovery.Factory enable the creation of new instance of NetworkTopologyDiscovery.
+     * This interface defines a delegate to the NetworkTopologyDiscovery.Factory class to enable subclassing.
      */
-    public static final class Factory {
-        private static volatile NetworkTopologyDiscovery _instance;
+    public static interface ClassDelegate {
 
-        /**
-         * This interface defines a delegate to the NetworkTopologyDiscovery.Factory class to enable subclassing.
-         */
-        public static interface ClassDelegate {
+      /**
+       * Allows the delegate the opportunity to construct and return a different NetworkTopologyDiscovery.
+       *
+       * @return Should return a new NetworkTopologyDiscovery Object.
+       * @see #classDelegate()
+       * @see #setClassDelegate(ClassDelegate anObject)
+       */
+      public NetworkTopologyDiscovery newNetworkTopologyDiscovery();
+    }
 
-            /**
-             * Allows the delegate the opportunity to construct and return a different NetworkTopologyDiscovery.
-             *
-             * @return Should return a new NetworkTopologyDiscovery Object.
-             * @see #classDelegate()
-             * @see #setClassDelegate(ClassDelegate anObject)
-             */
-            public NetworkTopologyDiscovery newNetworkTopologyDiscovery();
-        }
+    private static final AtomicReference<Factory.ClassDelegate> _databaseClassDelegate = new AtomicReference<Factory.ClassDelegate>();
 
-        private static final AtomicReference<Factory.ClassDelegate> _databaseClassDelegate = new AtomicReference<Factory.ClassDelegate>();
-
-        private Factory() {
-            super();
-        }
-
-        /**
-         * Assigns <code>delegate</code> as NetworkTopologyDiscovery's class delegate. The class delegate is optional.
-         *
-         * @param delegate
-         *            The object to set as NetworkTopologyDiscovery's class delegate.
-         * @see #classDelegate()
-         * @see JmmDNS.Factory.ClassDelegate
-         */
-        public static void setClassDelegate(Factory.ClassDelegate delegate) {
-            _databaseClassDelegate.set(delegate);
-        }
-
-        /**
-         * Returns NetworkTopologyDiscovery's class delegate.
-         *
-         * @return NetworkTopologyDiscovery's class delegate.
-         * @see #setClassDelegate(ClassDelegate anObject)
-         * @see JmmDNS.Factory.ClassDelegate
-         */
-        public static Factory.ClassDelegate classDelegate() {
-            return _databaseClassDelegate.get();
-        }
-
-        /**
-         * Returns a new instance of NetworkTopologyDiscovery using the class delegate if it exists.
-         *
-         * @return new instance of NetworkTopologyDiscovery
-         */
-        protected static NetworkTopologyDiscovery newNetworkTopologyDiscovery() {
-            NetworkTopologyDiscovery instance = null;
-            Factory.ClassDelegate delegate = _databaseClassDelegate.get();
-            if (delegate != null) {
-                instance = delegate.newNetworkTopologyDiscovery();
-            }
-            return (instance != null ? instance : new NetworkTopologyDiscoveryImpl());
-        }
-
-        /**
-         * Return the instance of the Multihomed Multicast DNS.
-         *
-         * @return the JmmDNS
-         */
-        public static NetworkTopologyDiscovery getInstance() {
-            if (_instance == null) {
-                synchronized (NetworkTopologyDiscovery.Factory.class) {
-                    if (_instance == null) {
-                        _instance = NetworkTopologyDiscovery.Factory.newNetworkTopologyDiscovery();
-                    }
-                }
-            }
-            return _instance;
-        }
+    private Factory() {
+      super();
     }
 
     /**
-     * Get all local Internet Addresses for the machine.
+     * Assigns <code>delegate</code> as NetworkTopologyDiscovery's class delegate. The class delegate is optional.
      *
-     * @return Set of InetAddress
+     * @param delegate The object to set as NetworkTopologyDiscovery's class delegate.
+     * @see #classDelegate()
+     * @see JmmDNS.Factory.ClassDelegate
      */
-    public abstract InetAddress[] getInetAddresses();
+    public static void setClassDelegate(Factory.ClassDelegate delegate) {
+      _databaseClassDelegate.set(delegate);
+    }
 
     /**
-     * Check if a given InetAddress should be used for mDNS
+     * Returns NetworkTopologyDiscovery's class delegate.
      *
-     * @param networkInterface
-     * @param interfaceAddress
-     * @return <code>true</code> is the address is to be used, <code>false</code> otherwise.
+     * @return NetworkTopologyDiscovery's class delegate.
+     * @see #setClassDelegate(ClassDelegate anObject)
+     * @see JmmDNS.Factory.ClassDelegate
      */
-    public boolean useInetAddress(NetworkInterface networkInterface, InetAddress interfaceAddress);
+    public static Factory.ClassDelegate classDelegate() {
+      return _databaseClassDelegate.get();
+    }
 
     /**
-     * Locks the given InetAddress if the device requires it.
+     * Returns a new instance of NetworkTopologyDiscovery using the class delegate if it exists.
      *
-     * @param interfaceAddress
+     * @return new instance of NetworkTopologyDiscovery
      */
-    public void lockInetAddress(InetAddress interfaceAddress);
+    protected static NetworkTopologyDiscovery newNetworkTopologyDiscovery() {
+      NetworkTopologyDiscovery instance = null;
+      Factory.ClassDelegate delegate = _databaseClassDelegate.get();
+      if (delegate != null) {
+        instance = delegate.newNetworkTopologyDiscovery();
+      }
+      return (instance != null ? instance : new NetworkTopologyDiscoveryImpl());
+    }
 
     /**
-     * Locks the given InetAddress if the device requires it.
+     * Return the instance of the Multihomed Multicast DNS.
      *
-     * @param interfaceAddress
+     * @return the JmmDNS
      */
-    public void unlockInetAddress(InetAddress interfaceAddress);
+    public static NetworkTopologyDiscovery getInstance() {
+      if (_instance == null) {
+        synchronized (NetworkTopologyDiscovery.Factory.class) {
+          if (_instance == null) {
+            _instance = NetworkTopologyDiscovery.Factory.newNetworkTopologyDiscovery();
+          }
+        }
+      }
+      return _instance;
+    }
+  }
+
+  /**
+   * Get all local Internet Addresses for the machine.
+   *
+   * @return Set of InetAddress
+   */
+  public abstract InetAddress[] getInetAddresses();
+
+  /**
+   * Check if a given InetAddress should be used for mDNS
+   *
+   * @param networkInterface
+   * @param interfaceAddress
+   * @return <code>true</code> is the address is to be used, <code>false</code> otherwise.
+   */
+  public boolean useInetAddress(NetworkInterface networkInterface, InetAddress interfaceAddress);
+
+  /**
+   * Locks the given InetAddress if the device requires it.
+   *
+   * @param interfaceAddress
+   */
+  public void lockInetAddress(InetAddress interfaceAddress);
+
+  /**
+   * Locks the given InetAddress if the device requires it.
+   *
+   * @param interfaceAddress
+   */
+  public void unlockInetAddress(InetAddress interfaceAddress);
 
 }

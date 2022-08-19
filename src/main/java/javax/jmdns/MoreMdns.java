@@ -6,5 +6,6 @@ package javax.jmdns;
  */
 public interface MoreMdns {
   void recover();
+
   void cleanCache();
 }

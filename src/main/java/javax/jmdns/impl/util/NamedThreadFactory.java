@@ -13,23 +13,23 @@ import java.util.concurrent.ThreadFactory;
  * @author Trejkaz, Pierre Frisch
  */
 public class NamedThreadFactory implements ThreadFactory {
-    private final ThreadFactory _delegate;
-    private final String _namePrefix;
+  private final ThreadFactory _delegate;
+  private final String _namePrefix;
 
-    /**
-     * Constructs the thread factory.
-     *
-     * @param namePrefix a prefix to append to thread names (will be separated from the default thread name by a space.)
-     */
-    public NamedThreadFactory(String namePrefix) {
-        this._namePrefix = namePrefix;
-        _delegate = Executors.defaultThreadFactory();
-    }
+  /**
+   * Constructs the thread factory.
+   *
+   * @param namePrefix a prefix to append to thread names (will be separated from the default thread name by a space.)
+   */
+  public NamedThreadFactory(String namePrefix) {
+    this._namePrefix = namePrefix;
+    _delegate = Executors.defaultThreadFactory();
+  }
 
-    @Override
-    public Thread newThread(Runnable runnable) {
-        Thread thread = _delegate.newThread(runnable);
-        thread.setName(_namePrefix + ' ' + thread.getName());
-        return thread;
-    }
+  @Override
+  public Thread newThread(Runnable runnable) {
+    Thread thread = _delegate.newThread(runnable);
+    thread.setName(_namePrefix + ' ' + thread.getName());
+    return thread;
+  }
 }

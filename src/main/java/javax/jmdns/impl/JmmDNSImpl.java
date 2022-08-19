@@ -763,7 +763,7 @@ public class JmmDNSImpl implements JmmDNS, NetworkTopologyListener, ServiceInfoI
         }
         _knownAddresses = current;
       } catch (Exception e) {
-        logger1.warn("Unexpected unhandled exception: ", e);
+        logger1.warn("Unexpected unhandled exception: "+ e.getMessage());
       }
     }
 

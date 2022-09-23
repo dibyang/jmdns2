@@ -744,21 +744,25 @@ public class JmmDNSImpl implements JmmDNS, NetworkTopologyListener, ServiceInfoI
         InetAddress[] curentAddresses = _topology.getInetAddresses();
         Set<InetAddress> current = new HashSet<InetAddress>(curentAddresses.length);
         for (InetAddress address : curentAddresses) {
-          current.add(address);
+
           if (!_knownAddresses.contains(address)) {
             final NetworkTopologyEvent event = new NetworkTopologyEventImpl(_mmDNS, address);
             try {
               _mmDNS.inetAddressAdded(event);
+              current.add(address);
+              logger1.info("added address: "+ address);
             } catch (InetAddressAddException e) {
               logger1.warn(e.getMessage());
-              current.remove(address);
             }
+          }else{
+            current.add(address);
           }
         }
         for (InetAddress address : _knownAddresses) {
           if (!current.contains(address)) {
             final NetworkTopologyEvent event = new NetworkTopologyEventImpl(_mmDNS, address);
             _mmDNS.inetAddressRemoved(event);
+            logger1.info("removed address: "+ address);
           }
         }
         _knownAddresses = current;
